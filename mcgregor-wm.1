@@ -1,0 +1,61 @@
+.TH MCGREGOR-WM 1 "November 2026" "mcgregor-wm 1.0"
+.SH NAME
+mcgregor-wm \- extremely minimal window manager
+.SH SYNOPSIS
+.B mcgregor-wm
+.RB [ \-v ]
+.SH DESCRIPTION
+.B mcgregor-wm
+puts a thin frame with a title bar around each window and provides
+multiple desktops. It has no toolbar and no menus.
+New windows never take the keyboard focus from the window you are
+using: they appear with an orange title bar and are one Alt+Tab away.
+Alt+Tab cycles windows on the current desktop in most-recently-used order.
+This is the Slackware 3.6 (XFree86 3.3) build: titles use a Latin\-1
+core font, and the X screen is treated as a single monitor.
+.SH KEYS
+.TP
+.B Alt+Tab, Alt+Shift+Tab
+Cycle windows, most recent first. Release Alt to choose; the mouse pointer
+jumps to the centre of the chosen window (WARP_ON_ALTTAB). Escape cancels.
+.TP
+.B Alt+1..9
+Go to desktop N (4 desktops by default).
+.TP
+.B Alt+Shift+1..9
+Send the focused window to desktop N.
+.TP
+.B Ctrl+Alt+Left, Ctrl+Alt+Right
+Previous or next desktop.
+.TP
+.B Alt+F4
+Close the window.
+.TP
+.B Alt+F9
+Iconify the window (Alt+Tab brings it back).
+.TP
+.B Alt+F10
+Maximize or restore.
+.TP
+.B Alt+F11
+Fullscreen or restore.
+.TP
+.B Alt+Return
+Start xterm.
+.TP
+.B Ctrl+Alt+Shift+R
+Restart in place, keeping X and all windows; also loads a newly installed
+binary. Sending SIGHUP (killall \-HUP mcgregor\-wm) does the same.
+.TP
+.B Ctrl+Alt+Shift+Q
+Quit.
+.SH MOUSE
+Click to focus and raise. Click the [X] on the title bar to close. Drag the title bar, or Alt+drag anywhere, to
+move. Drag any edge or corner, or Alt+right\-drag near a corner, to resize. Double\-click the title bar to maximize;
+middle\-click it to lower the window.
+.SH FILES
+.TP
+.I ~/.mcgregor-wm/autostart
+Run at startup if it exists and is executable.
+.SH CONFIGURATION
+Edit the settings at the top of mcgregor-wm.c and rebuild.

@@ -1,0 +1,146 @@
+mcgregor-wm for Slackware 3.6
+=============================
+
+This is mcgregor-wm, an extremely minimal Blackbox-style window manager,
+built for a 1998 Slackware 3.6 system: Linux 2.0, libc5, gcc 2.7.2.3 and
+XFree86 3.3 (X11R6.3). It is one C file that needs only Xlib.
+
+What it does:
+
+  - Each window gets a frame with a title bar and an [X] close box. There
+    is no toolbar and there are no menus.
+  - 4 desktops.
+  - New windows never take the keyboard focus from the window you're
+    typing in. They appear with an orange title bar, one Alt+Tab away.
+  - Alt+Tab cycles windows in most-recently-used order, and the mouse
+    pointer jumps to the window you pick.
+  - Resize by dragging any edge or corner.
+  - Restart in place without ending X.
+
+
+Differences from the modern version
+-----------------------------------
+
+  - Titles are drawn with a core X font (9x15 if present, else 8x13 or
+    7x13, else "fixed") in Latin-1. XFree86 3.3 can't draw UTF-8, so the
+    rare app that sets a UTF-8 title has it converted; characters outside
+    Latin-1 show as '?'.
+  - The screen is one monitor. Xinerama didn't exist until XFree86 4.0.
+    (On a later system that has it, build with
+    make CFLAGS="-O2 -Wall -DXINERAMA" LDLIBS="-lX11 -lXinerama"
+    to get the multi-monitor support back.)
+  - Alt+Return starts xterm.
+  - The autostart file is ~/.mcgregor-wm/autostart.
+  - The code is plain C89, as gcc 2.7.2.3 expects.
+
+
+Building and installing
+-----------------------
+
+Copy mcgregor-wm-slack36.tar.gz to the Slackware machine (ftp, floppy,
+whatever works), then as root:
+
+    gzip -dc mcgregor-wm-slack36.tar.gz | tar xf -
+    cd mcgregor-wm-slack36
+    make
+    make install          # /usr/local/bin/mcgregor-wm, /usr/local/man/man1
+
+You need the X development files: the "x" disk set's xbin and xlib
+packages put the headers in /usr/X11R6/include and the libraries in
+/usr/X11R6/lib, which the Makefile uses. If your X is elsewhere:
+
+    make XINC=-I/path/to/include XLIB=-L/path/to/lib
+
+To use it, put this at the end of ~/.xinitrc and run startx:
+
+    exec mcgregor-wm
+
+With xdm, put the same line at the end of ~/.xsession (and make that
+file executable).
+
+
+Keys
+----
+
+    Alt+Tab, Alt+Shift+Tab   cycle windows, most recent first; release Alt
+                             to choose, Esc cancels
+    Alt+1 .. Alt+4           go to desktop 1-4
+    Alt+Shift+1 .. 4         send the window to desktop 1-4
+    Ctrl+Alt+Left / Right    previous / next desktop
+    Alt+F4                   close
+    Alt+F9                   iconify (Alt+Tab brings it back)
+    Alt+F10                  maximize / restore
+    Alt+F11                  fullscreen / restore
+    Alt+Return               xterm
+    Ctrl+Alt+Shift+R         restart mcgregor-wm (X keeps running)
+    Ctrl+Alt+Shift+Q         quit
+
+Mouse:
+
+    click a window           focus and raise
+    click [X]                close (slide off before releasing to cancel)
+    drag the title bar       move (Alt+drag anywhere also moves)
+    drag an edge or corner   resize
+    Alt+right-drag           resize from the nearest corner
+    double-click title       maximize / restore
+    middle-click title       lower the window
+
+
+Starting programs
+-----------------
+
+There's no menu. Put what you want at login in ~/.mcgregor-wm/autostart
+and make it executable (chmod +x):
+
+    #!/bin/sh
+    xsetroot -solid '#2d3a46' &
+    xterm &
+
+Everything else you start from an xterm (Alt+Return).
+
+
+Restarting
+----------
+
+Press Ctrl+Alt+Shift+R, or from an xterm:
+
+    killall -HUP mcgregor-wm
+
+The window manager gives its windows back to X and starts again in the
+same process, so X doesn't exit. It runs the binary that is installed at
+that moment, so "make install" followed by a restart puts a new build into
+effect. Windows keep their desktop, place, size, iconified and fullscreen
+state, and the focus and Alt+Tab order are kept. The autostart file isn't
+run again.
+
+
+Configuration
+-------------
+
+Edit the block at the top of mcgregor-wm.c and run make again: number of
+desktops, the modifier key (Mod1Mask is Alt), border width, title font
+and padding, colours, the terminal command, and the new-window rules
+(FOCUS_NEW_IF_NONE, FOCUS_TRANSIENTS, RAISE_NEW, WARP_ON_ALTTAB).
+
+Every function in mcgregor-wm.c has a comment above it explaining what it
+does.
+
+
+How this build was checked
+--------------------------
+
+It was not compiled with gcc 2.7.2.3 or against XFree86 3.3 itself;
+neither is available here. Instead:
+
+  - it compiles cleanly as strict C89 (gcc -std=c89 -pedantic
+    -Werror=declaration-after-statement), the dialect gcc 2.7.2.3
+    implements;
+  - every Xlib function it calls existed by X11R5, so all are in X11R6.3,
+    and every C library function it uses is in libc5;
+  - its behaviour was tested on a virtual X server with the same
+    automated suites as the modern version: focus not stolen by new
+    windows or by apps, Alt+Tab order, desktops, move, edge and corner
+    resizing, maximize, fullscreen, iconify, close, restart (82 checks),
+    plus a check that UTF-8 titles are converted to Latin-1 correctly.
+
+If gcc 2.7.2.3 reports anything, send me the error and I'll fix it.
